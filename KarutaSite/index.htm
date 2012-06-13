@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="jquery-1.6.1.js" type="text/javascript"></script>
+    <script type="text/javascript" src="jquery-ui-1.8.16.custom.min.js"></script>
+    <script src="soundmanager2.js" type="text/javascript"></script>
+    <script src="Cards.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var cardsArray = new Array();
+        var cardsDic = new Object();
+
+        var cardsReadingList = new Array();
+
+        function StartGame() {
+            loadCardsToArray();
+
+            var cardNumber;
+            for (var i = 0; i < 5; i++) {
+                cardNumber = randomFromTo(0, cardsArray.length - 1);
+                $("#PlayArea").append(cardsArray[cardNumber]);
+                cardsArray.splice(cardNumber, 1);
+            }
+
+
+            $(".GameCard").draggable();
+            initCardsReading();
+            initSound();
+            $(".GameCard").dblclick(cardClicked);
+        }
+
+        function cardClicked(eventData) {
+            var clickTime = (new Date()).getTime();
+            var sourceObj = eventData.srcElement;
+            var cardId = parseInt((sourceObj.id).replace(/c_t/gi, '').replace(/c/gi, ''));
+
+            if (cardId == currentCardRead) {
+                $("#lastClickTime").html(((clickTime - readingStartTime) / 1000).toFixed(1));
+
+                $("#score").html(parseInt($("#score").html()) + 1);
+
+                $("#c" + cardId).hide();
+
+            }
+        }
+
+        function initCardsReading() {
+        
+            var optionalCards = new Array();
+
+            for (var i = 0; i < KarutaCardsArray.length; i++) {
+                optionalCards[i] = i;
+            }
+
+            var index = 0;
+
+            while (optionalCards.length > 0) {
+                index = randomFromTo(0, optionalCards.length-1);
+                cardsReadingList.push(optionalCards[index]);
+                optionalCards.splice(index, 1);
+            }
+
+
+        }
+
+        function randomFromTo(from, to) {
+            return Math.floor(Math.random() * (to - from + 1) + from);
+        }
+
+
+        function loadCardsToArray() {
+
+            for (var i = 1; i < KarutaCardsArray.length + 1; i++) {
+                cardsDic[i] = cardsArray[i - 1] = getCardObj(i);
+            }
+
+        }
+
+        function playCardAudio(cardNumber, onfinish) {
+            console.log('cardNumber:' + cardNumber);
+            return playAudioFile('card_ (' + (cardNumber + 1) + ')', onfinish);
+        }
+
+        function playAudioFile(file, onfinishEvent) {
+            var mySoundObject;
+            console.log('file:' + file); 
+
+            if (soundManager.ok()) {
+                mySoundObject = soundManager.createSound({
+                    id: file,
+                    url: 'sounds/' + file + '.mp3'
+                });
+
+                soundManager.play(file, { onfinish: onfinishEvent });
+            }
+            else {
+                soundManager.onready(function () {
+
+                    mySoundObject = soundManager.createSound({
+                        id: file,
+                        url: 'sounds/' + file + '.mp3'
+                    });
+                    soundManager.play(file, { onfinish: onfinishEvent });
+
+                });
+            }
+            return mySoundObject;
+        }
+
+
+        function initSound() {
+            soundManager.url = 'swf/';
+            soundManager.flashVersion = 9; // optional: shiny features (default = 8)
+            soundManager.useFlashBlock = false; // optionally, enable when you're ready to dive in
+            /*
+            * read up on HTML5 audio support, if you're feeling adventurous.
+            * iPad/iPhone and devices without flash installed will always attempt to use it.
+            */
+
+        }
+
+        function getCardObj(id) {
+            var obj = $('<Div />');
+            obj.attr('id', 'c' + id);
+            obj.attr('class', 'GameCard ');
+
+            var kcard = getKarutaCard(id);
+            obj.append('<div class="GameCardText" id="c_t' + id + '">' + kcard.hiregana.replace(/\|/gi, '<br />') + '</div>');
+            return obj;
+        }
+
+
+        $(document).ready(StartGame);
+
+        var readingStartTime = (new Date()).getTime();
+        var currentCardRead = 0;
+        function StartReading() {
+            console.log('cardsReadingList:' + cardsReadingList.toString());
+
+            currentCardRead = cardsReadingList.pop();
+            console.log('currentCardRead:' + currentCardRead);
+
+            var mySoundObject = playCardAudio(currentCardRead, StartReading);
+            readingStartTime = (new Date()).getTime();
+        }
+
+        function StartClick(src) {
+            $(src).hide();
+
+            StartReading();
+        }
+
+
+    
+    </script>
+    <style type="text/css">
+        #PlayArea
+        {
+            border: 1px solid black;
+            width: 1024px;
+            height: 1024px;
+            float:left;
+        }
+        .GameCard
+        {
+            width: 138px;
+            height: 195px;
+            float: left;
+            margin: 10px 0px 0px 10px;
+            background-image: url('card.jpg');
+            cursor: pointer;
+        }
+        .GameCardText
+        {
+            margin: 17px;
+            font-size: 18pt;
+            font-weight: bolder;
+            letter-spacing: 3px;
+            writing-mode: tb-rl;
+            float: right;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -o-user-select: none;
+            user-select: none;
+            glyph-orientation-vertical: 0deg;
+        }
+        
+        ::selection
+        {
+            background: transparent;
+        }
+        ::-moz-selection
+        {
+            background: transparent;
+        }
+        
+        .aaa
+        {
+            -webkit-transform: rotate(90deg);
+            -moz-transform: rotate(90deg);
+            filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="PlayArea">
+        <div id="draggable">
+        </div>
+    </div>
+
+    <div id="score" style="float:right;">0</div>
+    <div id="lastClickTime" style="float:right;margin:10px;">0</div>
+    <input id="StartBtn" value="start Reading" title="Start Reading" type="button" onclick="StartClick(this)" />
+</body>
+</html>
