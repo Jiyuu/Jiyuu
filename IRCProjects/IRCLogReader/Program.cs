@@ -29,7 +29,9 @@ namespace IRCLogReader
         public static void ReadLogToDB(string file)
         {
             string[] lines = File.ReadAllLines(file);
-
+            //IRCLogReader.Caches.Files.Getfile(File.Open(file, FileMode.Open));
+            //Caches.Files.Getfile();
+            int fileID = Files.Getfile(File.Open(file, FileMode.Open));
             string line;
             for (int i = 0; i < lines.Length; i++)
             {
@@ -42,13 +44,13 @@ namespace IRCLogReader
         {
             public DateTime timestamp{get;set;}
             public string RawText {get;set; }
-            public string LineSrc { get; set; }
-            public string LogFile { get; set; }
+            public int LineSrc { get; set; }
+            public int LogFile { get; set; }
         }
         public class IrcTextLine:IrcLine
         {
             public string Msg { get; set; }
-            public long NickID { get; set; }
+            public int NickID { get; set; }
             public string Nick { get; set; }
         }
 
@@ -73,4 +75,6 @@ namespace IRCLogReader
         }
 
     }
+
+    
 }

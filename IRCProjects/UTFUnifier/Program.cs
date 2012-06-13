@@ -17,6 +17,8 @@ namespace UTFUnifier
 
             string[] files = Directory.GetFileSystemEntries(".", "*.log");
 
+            if (!Directory.Exists("Unified"))
+                Directory.CreateDirectory("Unified");
            
             int i=0;
             foreach (var file in files)
@@ -35,17 +37,17 @@ namespace UTFUnifier
         static string numeralsstring = "0123456789";
         public static void UnifyFile(string filename)
         {
-            FileStream fs = File.OpenRead(filename);
+            FileStream fs = File.Open(filename,FileMode.Open,FileAccess.Read,FileShare.ReadWrite);
 
 
             StringBuilder convertedFile = new StringBuilder();
             string line = null;
             while ((line = ReadLineFromStream(fs)) != null)
             {
-                if (line.Length>0 && line[0] == '')
-                {
-                    line = line.Substring(3);
-                }
+                //if (line.Length>0 && line[0] == '')
+                //{
+                //    line = line.Substring(3);
+                //}
                 convertedFile.AppendLine(line);
             }
 
